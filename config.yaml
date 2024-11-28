@@ -1,0 +1,177 @@
+resources:
+  ec2:
+    service: ec2
+    method: describe_instances
+    response_key: Reservations.[].Instances.[]
+    fields:
+      - InstanceId
+      - InstanceType
+      - State.Name:State
+      - LaunchTime
+      - PrivateIpAddress
+      - PublicIpAddress
+      - Tags
+      - Platform
+
+  rds:
+    service: rds
+    method: describe_db_instances
+    response_key: DBInstances.[]
+    fields:
+      - DBInstanceIdentifier
+      - Engine
+      - EngineVersion
+      - DBInstanceClass
+      - DBInstanceStatus:Status
+      - Endpoint.Address:Endpoint
+      - AllocatedStorage
+      - Tags
+
+  lambda:
+    service: lambda
+    method: list_functions
+    response_key: Functions.[]
+    fields:
+      - FunctionName
+      - Runtime
+      - MemorySize:Memory
+      - Timeout
+      - LastModified
+      - Handler
+      - CodeSize
+      - Description
+
+  s3:
+    service: s3
+    method: list_buckets
+    response_key: Buckets.[]
+    fields:
+      - Name:BucketName
+      - CreationDate
+      - Owner.DisplayName:Owner
+
+  dynamodb:
+    service: dynamodb
+    method: list_tables
+    response_key: TableNames.[]
+    detail_method:
+      name: describe_table
+      param: TableName
+      response_key: Table
+    fields:
+      - TableName
+      - TableStatus
+      - CreationDateTime
+      - TableSizeBytes
+      - ItemCount
+      - TableArn
+      - ProvisionedThroughput.ReadCapacityUnits:ReadCapacity
+      - ProvisionedThroughput.WriteCapacityUnits:WriteCapacity
+
+  vpc:
+    service: ec2
+    method: describe_vpcs
+    response_key: Vpcs.[]
+    fields:
+      - VpcId
+      - CidrBlock
+      - State
+      - IsDefault
+      - Tags
+      - DhcpOptionsId
+      - InstanceTenancy
+
+  subnet:
+    service: ec2
+    method: describe_subnets
+    response_key: Subnets.[]
+    fields:
+      - SubnetId
+      - VpcId
+      - CidrBlock
+      - AvailabilityZone
+      - AvailableIpAddressCount
+      - DefaultForAz
+      - MapPublicIpOnLaunch
+      - Tags
+
+  route_table:
+    service: ec2
+    method: describe_route_tables
+    response_key: RouteTables.[]
+    fields:
+      - RouteTableId
+      - VpcId
+      - Tags
+      - Associations.[].SubnetId:SubnetId
+      - Routes.[].DestinationCidrBlock:Destinations
+      - Routes.[].GatewayId:GatewayIds
+
+  nacl:
+    service: ec2
+    method: describe_network_acls
+    response_key: NetworkAcls.[]
+    fields:
+      - NetworkAclId
+      - VpcId
+      - IsDefault
+      - Tags
+      - Entries.[].RuleNumber:Rules
+      - Entries.[].Protocol:Protocols
+      - Entries.[].CidrBlock:CidrBlocks
+      - Associations.[].SubnetId:SubnetIds
+
+  elastic_ip:
+    service: ec2
+    method: describe_addresses
+    response_key: Addresses.[]
+    fields:
+      - PublicIp
+      - AllocationId
+      - PrivateIpAddress
+      - InstanceId
+      - NetworkInterfaceId
+      - NetworkInterfaceOwner
+      - Tags
+
+  security_group:
+    service: ec2
+    method: describe_security_groups
+    response_key: SecurityGroups.[]
+    fields:
+      - GroupId
+      - GroupName
+      - Description
+      - VpcId
+      - Tags
+      - IpPermissions.[].FromPort:InboundPorts
+      - IpPermissions.[].IpRanges.[].CidrIp:InboundCidrs
+      - IpPermissionsEgress.[].FromPort:OutboundPorts
+      - IpPermissionsEgress.[].IpRanges.[].CidrIp:OutboundCidrs
+
+  loadbalancer:
+    service: elbv2
+    method: describe_load_balancers
+    response_key: LoadBalancers.[]
+    fields:
+      - LoadBalancerArn
+      - LoadBalancerName
+      - Type
+      - Scheme
+      - VpcId
+      - State.Code:State
+      - AvailabilityZones.[].ZoneName:Zones
+      - SecurityGroups
+      - DNSName
+
+  ecr:
+    service: ecr
+    method: describe_repositories
+    response_key: repositories.[]
+    fields:
+      - repositoryName
+      - repositoryArn
+      - registryId
+      - createdAt
+      - imageTagMutability
+      - imageScanningConfiguration.scanOnPush:ScanOnPush
