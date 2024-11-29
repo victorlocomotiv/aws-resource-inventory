@@ -24,7 +24,7 @@ Just run:
 python3 aws_inventory.py
 ```
 
-Output will be saved in `inventory/YYYYMMDD_HHMMSS/*.csv`
+Output will be saved in `inventory/AWS_ACCOUNT_ID/YYYYMMDD_HHMMSS/*.csv`
 
 ## Adding New Resources
 

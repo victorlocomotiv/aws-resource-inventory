@@ -12,7 +12,9 @@ class AWSResourceInventory:
         self.session = boto3.Session(region_name="us-east-1")
         self.account_id = self.session.client("sts").get_caller_identity()["Account"]
         self.regions = self._get_regions()
-        self.run_dir = Path("inventory") / datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.run_dir = (
+            Path("inventory") / self.account_id / datetime.now().strftime("%Y%m%d_%H%M%S")
+        )
         self.run_dir.mkdir(parents=True, exist_ok=True)
 
         with open("config.yaml") as f:
