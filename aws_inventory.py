@@ -51,17 +51,39 @@ class AWSResourceInventory:
             method = getattr(client, config["method"])
             response = method()
             items = self._get_items_from_response(response, config["response_key"])
-
+            if not items or (isinstance(items, list) and not any(items)):
+                return []
             resources = []
-            for item in items:
+            for parent_item in items:
                 try:
                     if "detail_method" in config:
-                        detail = config["detail_method"]
-                        params = {detail["param"]: item}
-                        item = self._get_items_from_response(
-                            getattr(client, detail["name"])(**params), detail["response_key"]
-                        )[0]
-
+                        detail_methods = config["detail_method"]
+                        if not isinstance(detail_methods, list):
+                            detail_methods = [detail_methods]
+                        current_item = parent_item
+                        stored_item = None
+                        for detail in detail_methods:
+                            params = {detail["param"]: current_item}
+                            if detail.get("store_parent", False):
+                                stored_item = current_item
+                            if "extra_params" in detail:
+                                for k, v in detail["extra_params"].items():
+                                    if v == "stored":
+                                        params[k] = stored_item
+                                    else:
+                                        params[k] = current_item
+                            detail_response = getattr(client, detail["name"])(**params)
+                            detail_items = self._get_items_from_response(
+                                detail_response, detail["response_key"]
+                            )
+                            if not detail_items and detail.get("skip_empty", False):
+                                break
+                            if not detail_items:
+                                continue
+                            current_item = detail_items[0]
+                        item = current_item
+                    else:
+                        item = parent_item
                     data = {"Region": region}
                     for field in config["fields"]:
                         source, target = field.split(":") if ":" in field else (field, field)
@@ -69,7 +91,6 @@ class AWSResourceInventory:
                     resources.append(data)
                 except ClientError:
                     continue
-
             return resources
         except ClientError as e:
             print(f"Skipping {service_name} in {region}: {e.response['Error']['Code']}")
