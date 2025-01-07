@@ -175,3 +175,71 @@ resources:
       - createdAt
       - imageTagMutability
       - imageScanningConfiguration.scanOnPush:ScanOnPush
+
+  ecs_clusters:
+    service: ecs
+    method: list_clusters
+    response_key: clusterArns
+    detail_method:
+      name: describe_clusters
+      param: clusters
+      response_key: clusters.[]
+    fields:
+      - clusterName
+      - clusterArn
+      - status
+      - registeredContainerInstancesCount
+      - runningTasksCount
+      - pendingTasksCount
+      - activeServicesCount
+
+  ecs_tasks:
+    service: ecs
+    method: list_clusters
+    response_key: clusterArns.[]
+    detail_method:
+      - name: list_tasks
+        param: cluster
+        response_key: taskArns
+        store_parent: true
+      - name: describe_tasks
+        param: tasks
+        extra_params:
+          cluster: stored
+        response_key: tasks.[]
+        skip_empty: true
+    fields:
+      - taskArn
+      - taskDefinitionArn
+      - clusterArn
+      - lastStatus
+      - desiredStatus
+      - healthStatus
+      - cpu
+      - memory
+      - launchType
+      - platformVersion
+      - group
+      - startedAt
+      - connectivity
+      - connectivityAt
+
+  ecs_task_definitions:
+    service: ecs
+    method: list_task_definitions
+    response_key: taskDefinitionArns.[]
+    detail_method:
+      name: describe_task_definition
+      param: taskDefinition
+      response_key: taskDefinition
+    fields:
+      - taskDefinitionArn
+      - family
+      - revision
+      - status
+      - requiresCompatibilities
+      - cpu
+      - memory
+      - networkMode
+      - containerDefinitions.[0].image:containerImage
+      - containerDefinitions.[0].name:containerName
